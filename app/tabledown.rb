@@ -1,43 +1,46 @@
-require 'pry'
+class TableDown
+  attr_reader :raw
 
+  def self.of input; new input; end
 
-def main
-  input = <<~STR
-    | head1 | head2 | h3 |
-    |---|---|---|
-    | here is some stuff | stuf | a thing!! |
-  STR
+  def initialize input; @raw = input; end
 
-  # split up input into a 2D array
-  lines = input.split("\n")
-  rows = lines.map do |line|
-    cells = line.split('|')
-    cells[1..-1]
+  def format
+    table.map { |row| format_row row }
+         .join("\n") + "\n"
   end
 
-  # find widest cell in each column
-  column_widths = [0] * rows[0].length
-  rows.each do |row|
-    row.each_with_index do |cell, i|
-      if cell.length > column_widths[i]
-        column_widths[i] = cell.length
-      end
+  private
+
+  def format_row r
+    '|' +
+    r.map.with_index { |cell, i| pad cell, i }
+     .join('|') + '|'
+  end
+
+  def pad cell, col
+    if cell[0] == '-'
+      '-' * widest_cell_in(col)
+    else
+      cell.ljust widest_cell_in(col)
     end
   end
 
-  # format the output with padding to make tables line up
-  output = rows.map do |row|
-    '|' + row.map.with_index do |cell, i|
-      if cell[0] == '-'
-        '-' * column_widths[i]
-      else
-        cell.ljust(column_widths[i])
-      end
-    end.join('|') + '|'
-  end.join("\n")
+  def table
+    @_table ||= parse_raw
+  end
 
-  puts output
+  def parse_raw
+    rows = raw.split "\n"
+    rows.map { |r| r.split('|')[1..-1] }
+  end
+
+  def widest_cell_in col
+    @_widths ||= {}
+    return @_widths[col] unless @_widths[col].nil?
+
+    @_widths[col] = table.map{ |row| row[col] }
+                         .map{ |cell| cell.length }
+                         .max
+  end
 end
-
-
-main
