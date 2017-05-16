@@ -1,4 +1,4 @@
-require_relative "../app/tabledown"
+require_relative "../lib/tabledown"
 
 
 describe TableDown do
