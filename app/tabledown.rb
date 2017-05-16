@@ -28,7 +28,11 @@ def main
   # format the output with padding to make tables line up
   output = rows.map do |row|
     '|' + row.map.with_index do |cell, i|
-      cell.ljust(column_widths[i])
+      if cell[0] == '-'
+        '-' * column_widths[i]
+      else
+        cell.ljust(column_widths[i])
+      end
     end.join('|') + '|'
   end.join("\n")
 
